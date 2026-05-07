@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Facturation SaaS API
+  description: API de conformité fiscale et gestion de facturation Factur-X.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/v1
+    description: Local development
+paths:
+  /invoices:
+    get:
+      summary: Liste les factures
+      tags:
+        - Invoices
+      responses:
+        '200':
+          description: Liste des factures
+          content:
+            application: json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
+    post:
+      summary: Crée une nouvelle facture
+      tags:
+        - Invoices
+      requestBody:
+        required: true
+        content:
+          application: json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInput'
+      responses:
+        '201':
+          description: Facture créée
+          content:
+            application: json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+
+components:
+  schemas:
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+        total_ht:
+          type: string
+          example: "100.00"
+        total_tva:
+          type: string
+          example: "20.00"
+        total_ttc:
+          type: string
+          example: "120.00"
+        status:
+          type: string
+          enum: [DRAFT, SENT, PAID, CANCELLED]
+    InvoiceInput:
+      type: object
+      required:
+        - customer_id
+        - lines
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceLineInput'
+    InvoiceLineInput:
+      type: object
+      required:
+        - description
+        - quantity
+        - unit_price
+        - vat_rate
+      properties:
+        description:
+          type: string
+        quantity:
+          type: string
+          example: "1.00"
+        unit_price:
+          type: string
+          example: "50.00"
+        vat_rate:
+          type: string
+          example: "20.00"
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
